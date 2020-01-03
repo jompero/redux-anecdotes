@@ -1,37 +1,59 @@
-import React from 'react'
-import { voteAnecdote } from '../reducers/anecdoteReducer'
-import { setMessage } from '../reducers/notificationReducer'
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
+import { voteAnecdote, initializeAnecdotes } from '../reducers/anecdoteReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
 const AnecdoteList = (props) => {
-    const { store } = props
-    const { anecdotes } = store.getState()
+    const { visibleAnecdotes, initializeAnecdotes } = props
+
+    useEffect(() => {
+        initializeAnecdotes()
+    }, [initializeAnecdotes])
 
     const vote = (id) => {
         console.log('vote', id)
-        store.dispatch(voteAnecdote(id))
-        store.dispatch(setMessage(`You voted for ${anecdotes.find((anecdote) => anecdote.id === id).content}`))
-    }
-
-    const sortedAnecdotes = () => {
-        console.log('sorting')
-        return anecdotes
-          .sort((a, b) => b.votes - a.votes)
-          .map(anecdote =>
-            <div key={anecdote.id}>
-                <div>
-                    {anecdote.content}
-                </div>
-                <div>
-                    has {anecdote.votes}
-                    <button onClick={() => vote(anecdote.id)}>vote</button>
-                </div>
-            </div>
-        )
+        props.voteAnecdote(id)
+        props.setNotification(`You voted for ${visibleAnecdotes.find((anecdote) => anecdote.id === id).content}`, 5)
     }
 
     return (
-        <div>{sortedAnecdotes()}</div>
+        <div>{visibleAnecdotes
+            .map(anecdote =>
+                <div key={anecdote.id}>
+                    <div>
+                        {anecdote.content}
+                    </div>
+                    <div>
+                        has {anecdote.votes}
+                        <button onClick={() => vote(anecdote.id)}>vote</button>
+                    </div>
+                </div>
+            )}</div>
     )
 }
 
-export default AnecdoteList
+const anecdotesToShow = ({ anecdotes, filter }) => {
+    console.log('Anecdotes:', anecdotes, 'Filter:', filter)
+    return anecdotes
+        .filter(anecdote => anecdote.content.includes(filter))
+        .sort((a, b) => b.votes - a.votes)
+}
+
+const mapStateToProps = (state) => {
+    console.log(state)
+    return {
+        visibleAnecdotes: anecdotesToShow(state),
+        filter: state.filter
+    }
+}
+
+const mapDispatchToProps = {
+    voteAnecdote,
+    setNotification,
+    initializeAnecdotes
+}
+
+export default connect(
+        mapStateToProps,
+        mapDispatchToProps
+    )(AnecdoteList)

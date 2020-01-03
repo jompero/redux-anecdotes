@@ -10,6 +10,11 @@ const reducer = (state = '', action) => {
     }  
 }
 
-// MAKE A COMPONENT AND ACTION CREATORS FOR THIS
+export const changeFilter = (filter) => {
+    return {
+        type: 'SET_FILTER',
+        data: filter
+    }
+}
 
 export default reducer

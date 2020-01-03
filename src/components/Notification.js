@@ -1,12 +1,9 @@
 import React from 'react'
-import { resetMessage } from '../reducers/notificationReducer'
+import { connect } from 'react-redux'
 
-const Notification = ({ store }) => {
-  const { notification } = store.getState()
+const Notification = (props) => {
+  const { notification } = props
   if (notification.message === '') return ''
-  setTimeout(() => { 
-    store.dispatch(resetMessage()) 
-  }, 5000)
 
   const style = {
     border: 'solid',
@@ -20,4 +17,12 @@ const Notification = ({ store }) => {
   )
 }
 
-export default Notification
+const mapStateToProps = (state) => {
+  return {
+    notification: state.notification
+  }
+}
+
+export default connect(
+    mapStateToProps
+  )(Notification)
